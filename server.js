@@ -9,22 +9,24 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Enable CORS for your Webflow domain
-const allowedOrigins = ['https://biaw-stage.webflow.io'];
+// Allow Webflow and localhost during development
+const allowedOrigins = ['https://biaw-stage.webflow.io', 'http://localhost:3000'];
 
+// CORS configuration
 app.use(cors({
     origin: (origin, callback) => {
-        if (allowedOrigins.includes(origin)) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            // Allow requests with no origin (e.g., mobile apps or server-to-server)
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
         }
     },
-    methods: ['GET', 'POST'], // Allowed methods
-    allowedHeaders: ['Content-Type'], // Allowed headers
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
 }));
 
-app.use(express.json()); // Parse JSON request body
+app.use(express.json());
 
 // Endpoint to create a checkout session
 app.post('/create-checkout-session', async (req, res) => {
