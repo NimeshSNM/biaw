@@ -43,8 +43,8 @@ app.post('/create-checkout-session', async (req, res) => {
             ],
             mode: 'payment',
             client_reference_id: clientReferenceId,
-            success_url: 'https://biaw-stage.webflow.io/success',
-            cancel_url: 'https://biaw-stage.webflow.io/cancel',
+            success_url: 'https://biaw-stage.webflow.io/thank-you',
+            cancel_url: 'https://biaw-stage.webflow.io/payment-declined',
             allow_promotion_codes: true, // Enable promo codes
         });
 
