@@ -1,27 +1,35 @@
-require('dotenv').config(); // Load environment variables
 const express = require('express');
 const cors = require('cors');
-const Stripe = require('stripe'); // Import Stripe
+const dotenv = require('dotenv');
+const Stripe = require('stripe');
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY); // Initialize Stripe with your secret key
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Enable CORS
+// Enable CORS for your Webflow domain
 const allowedOrigins = ['https://biaw-stage.webflow.io'];
+
 app.use(cors({
-    origin: allowedOrigins,
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: (origin, callback) => {
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST'], // Allowed methods
+    allowedHeaders: ['Content-Type'], // Allowed headers
 }));
 
-app.use(express.json()); // To parse JSON requests
+app.use(express.json()); // Parse JSON request body
 
-// Route to create a Stripe Checkout session
+// Endpoint to create a checkout session
 app.post('/create-checkout-session', async (req, res) => {
     try {
-        const { clientReferenceId, priceId, seats } = req.body;
+        const { seats, clientReferenceId, priceId } = req.body;
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -32,19 +40,20 @@ app.post('/create-checkout-session', async (req, res) => {
                 },
             ],
             mode: 'payment',
-            success_url: 'https://biaw-stage.webflow.io/thank-you',
-            cancel_url: 'https://biaw-stage.webflow.io/payment-declined',
             client_reference_id: clientReferenceId,
-            allow_promotion_codes: true, // Allow promo codes
+            success_url: 'https://biaw-stage.webflow.io/success',
+            cancel_url: 'https://biaw-stage.webflow.io/cancel',
+            allow_promotion_codes: true, // Enable promo codes
         });
 
         res.json({ url: session.url });
     } catch (error) {
         console.error('Error creating checkout session:', error.message);
-        res.status(500).json({ error: 'Failed to create checkout session' });
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
+// Start server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
