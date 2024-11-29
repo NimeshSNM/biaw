@@ -1,14 +1,15 @@
-require('dotenv').config(); // Ensure this line is at the top if using a .env file
+require('dotenv').config(); // Load environment variables
 const express = require('express');
 const cors = require('cors');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); // Access secret key
+const Stripe = require('stripe'); // Import Stripe
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY); // Initialize Stripe with your secret key
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS for Webflow (replace with your Webflow domain)
+// Enable CORS
 const allowedOrigins = ['https://biaw-stage.webflow.io'];
-
 app.use(cors({
     origin: allowedOrigins,
     methods: ['GET', 'POST'],
@@ -17,35 +18,31 @@ app.use(cors({
 
 app.use(express.json()); // To parse JSON requests
 
-// Route to handle Stripe Checkout session creation
+// Route to create a Stripe Checkout session
 app.post('/create-checkout-session', async (req, res) => {
     try {
-        const { priceId, quantity, clientReferenceId } = req.body;
+        const { clientReferenceId, priceId, seats } = req.body;
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [
                 {
                     price: priceId,
-                    quantity: quantity,
+                    quantity: seats,
                 },
             ],
-            allow_promo_codes: true, // Enable promo codes
-            client_reference_id: clientReferenceId,
+            mode: 'payment',
             success_url: 'https://biaw-stage.webflow.io/thank-you',
             cancel_url: 'https://biaw-stage.webflow.io/payment-declined',
+            client_reference_id: clientReferenceId,
+            allow_promotion_codes: true, // Allow promo codes
         });
 
-        res.json({ id: session.id });
+        res.json({ url: session.url });
     } catch (error) {
-        console.error('Error creating Stripe session:', error);
-        res.status(500).send('An error occurred while creating the session');
+        console.error('Error creating checkout session:', error.message);
+        res.status(500).json({ error: 'Failed to create checkout session' });
     }
-});
-
-// Existing route
-app.post('/submit', (req, res) => {
-    res.send('Form submitted successfully');
 });
 
 app.listen(PORT, () => {
