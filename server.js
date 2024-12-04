@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Allow Webflow and localhost during development
-const allowedOrigins = ['https://biaw-stage.webflow.io', 'http://localhost:3000'];
+const allowedOrigins = ['https://new.biaw.com/', 'http://localhost:3000'];
 
 // CORS configuration
 app.use(cors({
@@ -43,8 +43,8 @@ app.post('/create-checkout-session', async (req, res) => {
             ],
             mode: 'payment',
             client_reference_id: clientReferenceId,
-            success_url: 'https://biaw-stage.webflow.io/thank-you',
-            cancel_url: 'https://biaw-stage.webflow.io/payment-declined',
+            success_url: 'https://new.biaw.com/thank-you',
+            cancel_url: 'https://new.biaw.com/payment-declined',
             allow_promotion_codes: true, // Enable promo codes
         });
 
