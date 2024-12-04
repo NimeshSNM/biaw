@@ -9,22 +9,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Allow Webflow and localhost during development
-const allowedOrigins = ['https://new.biaw.com/', 'http://localhost:3000'];
-
-// CORS configuration
-app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            // Allow requests with no origin (e.g., mobile apps or server-to-server)
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type'],
-}));
+// Allow all origins
+app.use(cors());
 
 app.use(express.json());
 
