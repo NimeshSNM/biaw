@@ -29,8 +29,8 @@ app.post('/create-checkout-session', async (req, res) => {
             ],
             mode: 'payment',
             client_reference_id: clientReferenceId,
-            success_url: 'https://new.biaw.com/thank-you',
-            cancel_url: 'https://new.biaw.com/payment-declined',
+            success_url: 'https://biaw-stage-test-environment.webflow.io/thank-you',
+            cancel_url: 'https://biaw-stage-test-environment.webflow.io/payment-declined',
             allow_promotion_codes: true, // Enable promo codes
         });
 
